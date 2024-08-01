@@ -9,7 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "form-data": "^4.0.0",
     "next": "14.2.4",
+    "openai": "^4.53.2",
     "react": "^18",
     "react-audio-voice-recorder": "^2.2.0",
     "react-dom": "^18"
