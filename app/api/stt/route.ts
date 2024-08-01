@@ -20,20 +20,20 @@ export async function POST(request: NextRequest) {
   // Save the file temporarily
   const tempDir = os.tmpdir();
   const tempFilePath = path.join(tempDir, file.name);
-  fs.writeFileSync(tempFilePath, new Uint8Array(buffer));
+  await fs.promises.writeFile(tempFilePath, new Uint8Array(buffer));
 
   try {
     const transcription = await openAIService.transcribeAudio(tempFilePath);
 
     // Clean up the temporary file
-    fs.unlinkSync(tempFilePath);
+    await fs.promises.unlink(tempFilePath);
 
     return NextResponse.json({ transcription });
   } catch (error) {
     console.error("Error transcribing audio:", error);
 
     // Clean up the temporary file
-    fs.unlinkSync(tempFilePath);
+    await fs.promises.unlink(tempFilePath);
 
     return NextResponse.json(
       { error: "Error transcribing audio" },
