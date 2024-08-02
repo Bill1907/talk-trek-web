@@ -1,13 +1,30 @@
 "use client";
 import { useState } from "react";
-import { AudioRecorder } from "react-audio-voice-recorder";
+import { useAudioRecorder } from "react-audio-voice-recorder";
+import Button from "../button";
 
 export default function Recorder() {
   const [transcription, setTranscription] = useState("");
+  const {
+    startRecording,
+    stopRecording,
+    togglePauseResume,
+    recordingBlob,
+    isRecording,
+    isPaused,
+    recordingTime,
+    mediaRecorder,
+  } = useAudioRecorder();
 
-  const addAudioElement = async (blob: Blob) => {
+  const handleSubmit = async () => {
+    if (!recordingBlob) {
+      console.log("No audio recorded yet");
+      return;
+    }
+
+    // audioResult is a Blob object
     const formData = new FormData();
-    formData.append("file", blob, "audio.webm");
+    formData.append("file", recordingBlob, "audio.webm");
 
     try {
       const response = await fetch("/api/stt", {
@@ -26,17 +43,25 @@ export default function Recorder() {
     }
   };
 
+  const formatTime = (timeInSeconds: number): string => {
+    const minutes = Math.floor(timeInSeconds / 60);
+    const seconds = timeInSeconds % 60;
+    return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+  };
+
   return (
     <div>
-      <AudioRecorder
-        onRecordingComplete={addAudioElement}
-        audioTrackConstraints={{
-          noiseSuppression: true,
-          echoCancellation: true,
-        }}
-        downloadOnSavePress={true}
-        downloadFileExtension="webm"
-      />
+      <p>
+        Recording status:{" "}
+        {isRecording ? (isPaused ? "Paused" : "Recording") : "Not recording"}
+      </p>
+      <p>Recording time: {formatTime(recordingTime)}</p>
+      <Button onClick={startRecording}>Start Recording</Button>
+      <Button onClick={stopRecording}>Stop Recording</Button>
+      <Button onClick={togglePauseResume}>Pause Recording</Button>
+      <Button onClick={togglePauseResume}>Resume Recording</Button>
+      <Button onClick={handleSubmit}>Transcribe</Button>
+
       {transcription && <p>{transcription}</p>}
     </div>
   );
